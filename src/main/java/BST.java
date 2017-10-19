@@ -124,7 +124,6 @@ public class BST<E extends Comparable<E>> extends AbstractTree<E> implements Clo
                 // Special case: parentOfRightMost == current
                 parentOfRightMost.left = rightMost.left;
         }
-
         size--;
         return true; // Element deleted successfully
     }
