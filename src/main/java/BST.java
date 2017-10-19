@@ -175,4 +175,8 @@ public class BST<E extends Comparable<E>> extends AbstractTree<E> implements Clo
             element = e;
         }
     }
+
+    private static void testMethode(){
+        System.out.println("Hello");
+    }
 }
