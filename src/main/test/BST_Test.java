@@ -12,8 +12,14 @@ import static org.junit.Assert.assertEquals;
 public class BST_Test {
     private BST<Integer> bst;
 
+    private BST<String> myArray;
+    private String[] stringList;
+
     @Before
     public void setUp() throws Exception {
+        stringList = new String[] {"1","2"};
+        myArray = new BST<String>(stringList);
+
         bst = new BST<Integer>();
         bst.insert(20);
         bst.insert(14);
@@ -27,6 +33,7 @@ public class BST_Test {
     @Test
     public void testSize(){
         assertEquals (7,bst.getSize());
+        assertEquals (2,myArray.getSize());
     }
 
     @Test

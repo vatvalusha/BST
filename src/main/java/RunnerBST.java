@@ -19,9 +19,6 @@ public class RunnerBST {
         bst.insert(45);
         bst.insert(146);
         System.out.println(bst.toString());
-//        for (Iterator<Integer> iterator = bst.iterator(); iterator.hasNext(); ) {
-//            System.out.println(bst.getPath(iterator.next()));
-//        }
         simpleMenu(bst);
     }
 
