@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Stack;
+
 
 /**
  * Created by Valera on 18.10.2017.
@@ -26,15 +28,14 @@ public class BST<E extends Comparable<E>> extends AbstractTree<E> implements Clo
 
     @Override
     public boolean search(E e) {
-        TreeNode<E> current = root; // Start from the root
-
+        TreeNode<E> current = root;
         while (current != null) {
             if (e.compareTo(current.element) < 0) {
                 current = current.left;
             } else if (e.compareTo(current.element) > 0) {
                 current = current.right;
-            } else // element matches current.element
-                return true; // Element is found
+            } else
+                return true;
         }
         return false;
     }
@@ -44,9 +45,8 @@ public class BST<E extends Comparable<E>> extends AbstractTree<E> implements Clo
      35 * Return true if the element is inserted successfully. */
     public boolean insert(E e) {
         if (root == null)
-            root = createNewNode(e); // Create a new root
+            root = createNewNode(e);
         else {
-            // Locate the parent node
             TreeNode<E> parent = null;
             TreeNode<E> current = root;
             while (current != null)
@@ -57,15 +57,14 @@ public class BST<E extends Comparable<E>> extends AbstractTree<E> implements Clo
                     parent = current;
                     current = current.right;
                 } else
-                    return false; // Duplicate node not inserted
-            // Create the new node and attach it to the parent node
+                    return false;
             if (e.compareTo(parent.element) < 0)
                 parent.left = createNewNode(e);
             else
                 parent.right = createNewNode(e);
         }
         size++;
-        return true; // Element inserted successfully
+        return true;
     }
 
     protected TreeNode<E> createNewNode(E e) {
@@ -77,7 +76,6 @@ public class BST<E extends Comparable<E>> extends AbstractTree<E> implements Clo
      * Return true if the element is deleted successfully.
      * Return false if the element is not in the tree. */
     public boolean delete(E e) {
-        // Locate the node to be deleted and also locate its parent node
         TreeNode<E> parent = null;
         TreeNode<E> current = root;
         while (current != null) {
@@ -88,13 +86,11 @@ public class BST<E extends Comparable<E>> extends AbstractTree<E> implements Clo
                 parent = current;
                 current = current.right;
             } else
-                break; // Element is in the tree pointed at by current
+                break;
         }
         if (current == null)
-            return false; // Element is not in the tree
-        // Case 1: current has no left child
+            return false;
         if (current.left == null) {
-            // Connect the parent with the right child of the current node
             if (parent == null) {
                 root = current.right;
             } else {
@@ -104,28 +100,21 @@ public class BST<E extends Comparable<E>> extends AbstractTree<E> implements Clo
                     parent.right = current.right;
             }
         } else {
-            // Case 2: The current node has a left child.
-            // Locate the rightmost node in the left subtree of
-            // the current node and also its parent.
             TreeNode<E> parentOfRightMost = current;
             TreeNode<E> rightMost = current.left;
-
             while (rightMost.right != null) {
                 parentOfRightMost = rightMost;
-                rightMost = rightMost.right; // Keep going to the right
+                rightMost = rightMost.right;
             }
-            // Replace the element in current by the element in rightMost
             current.element = rightMost.element;
 
-            // Eliminate rightmost node
             if (parentOfRightMost.right == rightMost)
                 parentOfRightMost.right = rightMost.left;
             else
-                // Special case: parentOfRightMost == current
                 parentOfRightMost.left = rightMost.left;
         }
         size--;
-        return true; // Element deleted successfully
+        return true;
     }
 
 
@@ -140,29 +129,137 @@ public class BST<E extends Comparable<E>> extends AbstractTree<E> implements Clo
         return size;
     }
 
+    /**
+     * Returns the root of the tree
+     */
+    public TreeNode<E> getRoot() {
+        return root;
+    }
+
     @Override
     public Iterator<E> iterator() {
-        return null;
+        return new MyIterator();
+    }
+
+    private class MyIterator implements Iterator<E> {
+        Stack<TreeNode<E>> stk = new Stack<TreeNode<E>>();
+
+        public MyIterator() {
+            if (root != null)
+                stk.push(root);
+        }
+
+        public boolean hasNext() {
+            return !stk.isEmpty();
+        }
+
+        public E next() {
+            TreeNode<E> cur = stk.peek();
+            if (cur.left != null) {
+                stk.push(cur.left);
+            } else {
+                TreeNode<E> tmp = stk.pop();
+                while (tmp.right == null) {
+                    if (stk.isEmpty()) return cur.element;
+                    tmp = stk.pop();
+                }
+                stk.push(tmp.right);
+            }
+            return cur.element;
+        }
+
+        public void remove() {
+
+        }
     }
 
     /**
      * Returns the node for the specified element.
      * Returns null if the element is not in the tree.
      */
-    private TreeNode<E> getNode(E element) {
-        return null;
+    public TreeNode<E> get(E key) {
+        return get(root, key);
+    }
+
+    private TreeNode<E> get(TreeNode<E> x, E value) {
+        if (value == null)
+            throw new IllegalArgumentException("calls get() with a null value");
+        if (x == null)
+            return null;
+        int cmp = value.compareTo(x.element);
+        if (cmp < 0)
+            return get(x.left, value);
+        else if (cmp > 0)
+            return get(x.right, value);
+        else
+            return x;
     }
 
     /**
      * Returns true if the node for the element is a leaf
      */
-    private boolean isLeaf(E element) {
-        return false;
+    public boolean isLeaf(E item) {
+        return this.isLeaf(this.root, item);
     }
 
-    public ArrayList<E> getPath(E e) {
-        return null;
+    private boolean isLeaf(TreeNode<E> current, E value) {
+        if (current == null) {
+            return false;
+        } else if (current.left == null && current.right == null) {
+            return true;
+        } else {
+            return isLeaf(current.left, value) && isLeaf(current.right, value);
+        }
     }
+
+    public boolean isLeaf(TreeNode<E> node) {
+        if (node.left == null && node.right == null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        for (E data : this) sb.append(data.toString() + " ");
+
+        return sb.toString();
+    }
+
+
+    /**
+     * Return a path from the root leadting to the specified element
+     */
+    public ArrayList<E> getPath(E e) {
+        ArrayList<E> list = new ArrayList<E>();
+        TreeNode<E> current = root; // Start from the root
+
+        while (current != null) {
+            list.add(current.element); // Add the node to the list
+            if (e.compareTo(current.element) < 0) {
+                current = current.left;
+            } else if (e.compareTo(current.element) > 0) {
+                current = current.right;
+            } else
+                break;
+        }
+
+        return list;
+    }
+
+
+    /**
+     * Remove all elements from the tree
+     */
+
+    public void clear() {
+        root = null;
+        size = 0;
+    }
+
+
 
     public static class TreeNode<E extends Comparable<E>> {
         protected E element;
@@ -173,9 +270,15 @@ public class BST<E extends Comparable<E>> extends AbstractTree<E> implements Clo
         public TreeNode(E e) {
             element = e;
         }
-    }
 
-    private static void testMethode(){
-        System.out.println("Hello");
+        @Override
+        public String toString() {
+            return "TreeNode{" +
+                    "element=" + element +
+                    ", left=" + left +
+                    ", right=" + right +
+                    ", parent=" + parent +
+                    '}';
+        }
     }
 }
